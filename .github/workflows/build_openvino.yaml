@@ -16,6 +16,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust: [1.71]
     container:
       image: wasmedge/wasmedge:latest
     steps:
@@ -24,16 +27,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Stable Rust
-        uses: actions-rs/toolchain@v1
+      - name: Install Rust-stable
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          components: wasm32-wasi
+          toolchain: ${{ matrix.rust }}
+          target: wasm32-wasi
 
-      # - name: Install Rust wasi32
-      #   run: |
-      #     rustup target add wasm32-wasi
-          
       - name: Install OpenVINO
         env:
           OPENVINO_VERSION: "2021.4.582"
