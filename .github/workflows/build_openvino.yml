@@ -2,7 +2,11 @@ name: Build and Test WasmEdge WASI-NN examples
 
 on:
   push:
-    # branches: [master]
+    paths:
+      - ".github/workflows/build_openvino.yml"
+      - "openvino-mobilenet-raw/**"
+      - "openvino-mobilenet-image/**"
+      - "openvino-road-segmentation-adas/**"
     paths-ignore:
       - "**/*.md"
   pull_request:
@@ -14,7 +18,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  build_openvino_examples:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -55,10 +59,10 @@ jobs:
         run: |
           bash /opt/intel/openvino_2021/bin/setupvars.sh
           ldconfig
-          bash download_mobilenet.sh
           cd rust
           cargo build --target wasm32-wasi --release
-          cd -
+          cd ..
+          bash download_mobilenet.sh
           wasmedge --dir .:. ./rust/target/wasm32-wasi/release/wasmedge-wasinn-example-mobilenet.wasm mobilenet.xml mobilenet.bin tensor-1x224x224x3-f32.bgr
       
       - name: Build and run Rust example - Mobilenet Image
