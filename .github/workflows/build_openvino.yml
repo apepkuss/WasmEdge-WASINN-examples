@@ -59,33 +59,35 @@ jobs:
           ldconfig
           curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -v $VERSION -p /usr/local --plugins wasi_nn-openvino
           ldconfig
-          ls -al /usr/local/lib
-          ls -al /usr/local/lib/wasmedge
-          which wasmedge
-          wasmedge --version
-          echo "*** done! ***"
+          # ls -al /usr/local/lib
+          # ls -al /usr/local/lib/wasmedge
+          # which wasmedge
+          # wasmedge --version
+          # echo "*** done! ***"
 
-      - name: Download Mobilenet model files
-        working-directory: openvino-mobilenet-raw
-        run: |
-          bash download_mobilenet.sh
+      # - name: Download Mobilenet model files
+      #   working-directory: openvino-mobilenet-raw
+      #   run: |
+      #     bash download_mobilenet.sh
 
-      - name: Build and run Rust example - openvino-mobilenet-raw
+      - name: Build and run openvino-mobilenet-raw
         working-directory: openvino-mobilenet-raw
         run: |
           bash /opt/intel/openvino_2021/bin/setupvars.sh
           ldconfig
+          bash download_mobilenet.sh
           cd rust
           cargo build --target wasm32-wasi --release
           cd ..
-          wasmedge --dir .:. wasmedge-wasinn-example-mobilenet.wasm mobilenet.xml mobilenet.bin tensor-1x224x224x3-f32.bgr
+          wasmedge --dir .:. ./rust/target/wasm32-wasi/release/wasmedge-wasinn-example-mobilenet.wasm mobilenet.xml mobilenet.bin tensor-1x224x224x3-f32.bgr
       
-      - name: Build and run Rust example - Mobilenet Image
+      - name: Build and run openvino-mobilenet-image
+        working-directory: openvino-mobilenet-image
         run: |
-          bash -c "\
-          source /opt/intel/openvino_2021/bin/setupvars.sh;\
-          ldconfig;\
-          cd WasmEdge && cmake --install build && cd ..;\
-          cd openvino-mobilenet-image;\
-          ./download_mobilenet.sh;\
-          wasmedge --dir .:. wasmedge-wasinn-example-mobilenet-image.wasm mobilenet.xml mobilenet.bin input.jpg"
+          bash /opt/intel/openvino_2021/bin/setupvars.sh
+          ldconfig
+          bash download_mobilenet.sh
+          cd rust
+          cargo build --target wasm32-wasi --release
+          cd ..
+          wasmedge --dir .:. ./rust/target/wasm32-wasi/release/wasmedge-wasinn-example-mobilenet-image.wasm mobilenet.xml mobilenet.bin input.jpg
