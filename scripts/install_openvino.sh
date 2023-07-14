@@ -16,11 +16,13 @@ apt install -y intel-openvino-runtime-ubuntu20-$OPENVINO_VERSION
 source /opt/intel/openvino_2021/bin/setupvars.sh
 ldconfig
 
-ls -al /opt/intel/openvino_2021/deployment_tools/ngraph/lib/
-ls -al /opt/intel/openvino_2021/deployment_tools/inference_engine/lib/intel64/
-
+echo "*** inspect /etc/ld.so.conf"
 cat /etc/ld.so.conf
+
+echo "*** add new paths to /etc/ld.so.conf"
 echo "include /etc/ld.so.conf.d/*.conf" >> /etc/ld.so.conf
 echo "/opt/intel/openvino_2021/deployment_tools/ngraph/lib/" >> /etc/ld.so.conf
 echo "/opt/intel/openvino_2021/deployment_tools/inference_engine/lib/intel64/" >> /etc/ld.so.conf
+
+echo "*** inspect /etc/ld.so.conf"
 cat /etc/ld.so.conf
