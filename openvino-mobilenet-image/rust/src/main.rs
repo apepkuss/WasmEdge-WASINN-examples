@@ -1,8 +1,6 @@
 use image::io::Reader;
 use image::DynamicImage;
-use std::convert::TryInto;
 use std::env;
-use std::fs;
 use wasi_nn;
 mod imagenet_classes;
 
