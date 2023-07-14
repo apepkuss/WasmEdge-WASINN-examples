@@ -26,7 +26,7 @@ jobs:
       image: wasmedge/wasmedge:ubuntu-build-clang
     steps:
       - name: Checkout Wasi-NN examples
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -36,7 +36,6 @@ jobs:
           toolchain: ${{ matrix.rust }}
           target: wasm32-wasi
 
-      
       - name: Install dependencies
         run: |
           apt update
@@ -59,16 +58,6 @@ jobs:
           ldconfig
           curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -v $VERSION -p /usr/local --plugins wasi_nn-openvino
           ldconfig
-          # ls -al /usr/local/lib
-          # ls -al /usr/local/lib/wasmedge
-          # which wasmedge
-          # wasmedge --version
-          # echo "*** done! ***"
-
-      # - name: Download Mobilenet model files
-      #   working-directory: openvino-mobilenet-raw
-      #   run: |
-      #     bash download_mobilenet.sh
 
       - name: Build and run openvino-mobilenet-raw
         working-directory: openvino-mobilenet-raw
