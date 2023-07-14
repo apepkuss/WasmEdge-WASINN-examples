@@ -36,13 +36,14 @@ jobs:
         run: |
           ./scripts/install_openvino.sh
 
-      - name: Build WasmEdge Wasi-NN with OpenVINO backend using g++
+      - name: Install WasmEdge with Wasi-NN OpenVINO plugin
         env:
           CMAKE_BUILD_TYPE: "Release"
+          VERSION: "0.13.1"
         run: |
-          source /opt/intel/openvino_2021/bin/setupvars.sh
+          bash /opt/intel/openvino_2021/bin/setupvars.sh
           ldconfig
-          curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -p /usr/local --plugins wasi_nn-openvino
+          curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -v $VERSION -p /usr/local --plugins wasi_nn-openvino
           ldconfig
         #   git clone https://github.com/WasmEdge/WasmEdge;\
         #   cd ./WasmEdge;\
