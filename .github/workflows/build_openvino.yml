@@ -35,6 +35,13 @@ jobs:
           toolchain: ${{ matrix.rust }}
           target: wasm32-wasi
 
+      
+      - name: Install dependencies
+        working-directory: WasmEdge
+        run: |
+          apt update
+          apt install -y libtbb2
+
       - name: Install OpenVINO
         env:
           OPENVINO_VERSION: "2021.4.582"
