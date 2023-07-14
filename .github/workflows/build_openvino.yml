@@ -52,7 +52,7 @@ jobs:
       - name: Install WasmEdge with Wasi-NN OpenVINO plugin
         env:
           CMAKE_BUILD_TYPE: "Release"
-          VERSION: "0.12.0"
+          VERSION: "0.13.1"
         run: |
           bash /opt/intel/openvino_2021/bin/setupvars.sh
           ldconfig
