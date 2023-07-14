@@ -6,7 +6,9 @@ use std::fs;
 use wasi_nn;
 mod imagenet_classes;
 
-pub fn main() {
+use wasi_nn::{ExecutionTarget, GraphBuilder, GraphEncoding, TensorType};
+
+pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
     let model_xml_name: &str = &args[1];
     let model_bin_name: &str = &args[2];
@@ -18,46 +20,59 @@ pub fn main() {
     let weights = fs::read(model_bin_name).unwrap();
     println!("Read graph weights, size in bytes: {}", weights.len());
 
-    let graph = unsafe {
-        wasi_nn::load(
-            &[&xml.into_bytes(), &weights],
-            wasi_nn::GRAPH_ENCODING_OPENVINO,
-            wasi_nn::EXECUTION_TARGET_CPU,
-        )
-        .unwrap()
-    };
+    let graph = GraphBuilder::new(GraphEncoding::Openvino, ExecutionTarget::CPU)
+        .build_from_files([model_xml_name, model_bin_name])?;
+    // let graph = unsafe {
+    //     wasi_nn::load(
+    //         &[&xml.into_bytes(), &weights],
+    //         wasi_nn::GRAPH_ENCODING_OPENVINO,
+    //         wasi_nn::EXECUTION_TARGET_CPU,
+    //     )
+    //     .unwrap()
+    // };
     println!("Loaded graph into wasi-nn with ID: {}", graph);
 
-    let context = unsafe { wasi_nn::init_execution_context(graph).unwrap() };
-    println!("Created wasi-nn execution context with ID: {}", context);
+    println!("Init execution context ...");
+    let mut context = graph.init_execution_context()?;
+    // let context = unsafe { wasi_nn::init_execution_context(graph).unwrap() };
+    // println!("Created wasi-nn execution context with ID: {}", context);
 
     // Load a tensor that precisely matches the graph input tensor (see
+    let input_dims = vec![1, 3, 224, 224];
     let tensor_data = image_to_tensor(image_name.to_string(), 224, 224);
     println!("Read input tensor, size in bytes: {}", tensor_data.len());
-    let tensor = wasi_nn::Tensor {
-        dimensions: &[1, 3, 224, 224],
-        type_: wasi_nn::TENSOR_TYPE_F32,
-        data: &tensor_data,
-    };
-    unsafe {
-        wasi_nn::set_input(context, 0, tensor).unwrap();
-    }
+    // let tensor = wasi_nn::Tensor {
+    //     dimensions: &[1, 3, 224, 224],
+    //     type_: wasi_nn::TENSOR_TYPE_F32,
+    //     data: &tensor_data,
+    // };
+    context.set_input(0, TensorType::F32, &input_dims, tensor_data)?;
+    // unsafe {
+    //     wasi_nn::set_input(context, 0, tensor).unwrap();
+    // }
     // Execute the inference.
-    unsafe {
-        wasi_nn::compute(context).unwrap();
-    }
-    println!("Executed graph inference");
-    // Retrieve the output.
+
+    println!("Perform graph inference ...");
+    context.compute()?;
+    // unsafe {
+    //     wasi_nn::compute(context).unwrap();
+    // }
+
+    println!("Retrieve the output ...");
+    // Copy output to abuffer.
     let mut output_buffer = vec![0f32; 1001];
-    unsafe {
-        wasi_nn::get_output(
-            context,
-            0,
-            &mut output_buffer[..] as *mut [f32] as *mut u8,
-            (output_buffer.len() * 4).try_into().unwrap(),
-        )
-        .unwrap();
-    }
+    let output_bytes = context.get_output(0, &mut output_buffer)?;
+
+    // let mut output_buffer = vec![0f32; 1001];
+    // unsafe {
+    //     wasi_nn::get_output(
+    //         context,
+    //         0,
+    //         &mut output_buffer[..] as *mut [f32] as *mut u8,
+    //         (output_buffer.len() * 4).try_into().unwrap(),
+    //     )
+    //     .unwrap();
+    // }
 
     let results = sort_results(&output_buffer);
     for i in 0..5 {
@@ -69,6 +84,8 @@ pub fn main() {
             imagenet_classes::IMAGENET_CLASSES[results[i].0]
         );
     }
+
+    Ok(())
 }
 
 // Sort the buffer of probabilities. The graph places the match probability for each class at the
