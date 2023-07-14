@@ -87,7 +87,4 @@ jobs:
           bash /opt/intel/openvino_2021/bin/setupvars.sh
           ldconfig
           cargo build --target=wasm32-wasi --release
-          wasmedge --dir .:. target/wasm32-wasi/release/openvino-road-seg-adas.wasm \
-          ../model/road-segmentation-adas-0001.xml \
-          ../model/road-segmentation-adas-0001.bin \
-          ../image/empty_road_mapillary.jpg
+          wasmedge --dir .:. target/wasm32-wasi/release/openvino-road-seg-adas.wasm ../model/road-segmentation-adas-0001.xml ../model/road-segmentation-adas-0001.bin ../image/empty_road_mapillary.jpg
