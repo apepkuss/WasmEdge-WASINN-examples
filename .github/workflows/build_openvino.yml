@@ -51,6 +51,7 @@ jobs:
           ldconfig
           curl -sSf https://raw.githubusercontent.com/WasmEdge/WasmEdge/master/utils/install.sh | bash -s -- -v $VERSION -p /usr/local --plugins wasi_nn-openvino
           ldconfig
+          ls -al /usr/local/lib
 
       - name: Build and run Rust example - openvino-mobilenet-raw
         working-directory: openvino-mobilenet-raw
