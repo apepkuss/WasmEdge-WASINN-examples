@@ -22,7 +22,7 @@ jobs:
       matrix:
         rust: [1.71]
     container:
-      image: wasmedge/wasmedge:latest
+      image: wasmedge/wasmedge:ubuntu-build-clang
     steps:
       - name: Checkout Wasi-NN examples
         uses: actions/checkout@v2
@@ -53,6 +53,8 @@ jobs:
           ldconfig
           ls -al /usr/local/lib
           ls -al /usr/local/lib/wasmedge
+          which wasmedge
+          wasmedge --version
           cd openvino-mobilenet-raw
           bash download_mobilenet.sh
           wasmedge --dir .:. wasmedge-wasinn-example-mobilenet.wasm mobilenet.xml mobilenet.bin tensor-1x224x224x3-f32.bgr
