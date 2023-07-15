@@ -99,6 +99,8 @@ fn dump<T>(
 
     std::fs::write(path, &dst_slice).expect("failed to write file");
 
+    println!("*** done ***");
+
     Ok(())
 }
 
